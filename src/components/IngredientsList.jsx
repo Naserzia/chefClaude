@@ -1,21 +1,50 @@
-export default function IngredientsList(props) {
-  const ingredientsListItems = props.ingredients.map(ingredient => (
-    <li key={ingredient}>{ingredient}</li>
-  ));
+import { hasMinimumIngredients } from "../utils/ingredients";
+
+export default function IngredientsList({
+  ingredients = [],
+  onGenerateRecipe,
+  onClearIngredients,
+  isLoading = false,
+}) {
+  if (!ingredients.length) {
+    return null;
+  }
+
+  const hasEnoughIngredients = hasMinimumIngredients(ingredients, 3);
+
   return (
-    <section>
-      <h2>Ingredients on hand:</h2>
+    <section className="ingredients-panel">
+      <div className="ingredients-header">
+        <h2>Ingredients on hand:</h2>
+        <button
+          type="button"
+          className="clear-button"
+          onClick={onClearIngredients}
+        >
+          Clear all
+        </button>
+      </div>
+
       <ul className="ingredients-list" aria-live="polite">
-        {ingredientsListItems}
+        {ingredients.map((ingredient, index) => (
+          <li key={`${ingredient}-${index}`}>{ingredient}</li>
+        ))}
       </ul>
-      {props.ingredients.length > 3 && (
+
+      {hasEnoughIngredients ? (
         <div className="get-recipe-container">
           <div>
             <h3>Ready for a recipe?</h3>
             <p>Generate a recipe from your list of ingredients.</p>
           </div>
-          <button onClick={props.getRecipe}>Get a recipe</button>
+          <button type="button" onClick={onGenerateRecipe} disabled={isLoading}>
+            {isLoading ? "Generating..." : "Get a recipe"}
+          </button>
         </div>
+      ) : (
+        <p className="helper-text">
+          Add at least three ingredients to unlock recipe generation.
+        </p>
       )}
     </section>
   );
